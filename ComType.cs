@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 public abstract class ComType : IDisposable
 {
-    protected static Type Type { get; private set;}
+    protected Type Type { get; private set;}
     private bool _isDisposed;
     protected object _comInstance;
 
