@@ -7,12 +7,35 @@ namespace MaximDl
     {
         private static MaxImDlApp _instance;
 
+        public bool CalMedianBias 
+        {
+            get => (bool)InvokeGetter(nameof(CalMedianBias));
+            set => InvokeSetter(nameof(CalMedianBias), value);
+        }
+
+        public bool CalMedianDark 
+        {
+            get => (bool)InvokeGetter(nameof(CalMedianDark));
+            set => InvokeSetter(nameof(CalMedianDark), value);
+        }
+
+
         private MaxImDlApp() 
             : base (@"MaxIm.Application")
         {
             _comInstance = Activator.CreateInstance(Type)
                 ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
+
+        public void CalClear()
+            => InvokeMethod(nameof(CalClear), Array.Empty<object>());
+        public bool CalAddBias(string path)
+            => (bool)InvokeMethod(nameof(CalAddBias), path);
+        public bool CalAddDark(string path)
+            => (bool)InvokeMethod(nameof(CalAddBias), path);
+
+        public bool CalSet()
+            => (bool)InvokeMethod(nameof(CalSet));
 
         public static MaxImDlApp Acquire()
         {
