@@ -11,7 +11,7 @@ internal class Options
     [Option('b', "bias", Separator=';', HelpText = "Explicitly specified bias files")]
     public IEnumerable<string> Bias { get; set; }
 
-    [Option("bin", Default = 0, HelpText = "Bining, 0 | 2 | 3")]
+    [Option("bin", Default = (ushort)0, HelpText = "Bining, 0 | 2 | 3")]
     public ushort Bin { get; set; }
 
     [Option('o', "out-folder", Default = "calibrated", HelpText = "Folder to put calibrated frames into")]
