@@ -27,9 +27,13 @@ namespace MaximDl
         public void Calibrate()
             => InvokeMethod(nameof(Calibrate));
 
-        public void Bin(ushort size)
-            => InvokeMethod(nameof(Bin), size);
-
+        public void Bin(BinType bin)
+        {
+            if (bin == BinType.NoBin)
+                throw new ArgumentException($"Cannot bin image using {bin} regime", nameof(bin));
+            
+            InvokeMethod(nameof(Bin), (ushort)bin);
+        }
         public void SaveFile(string path, byte format, bool stretch = false, byte sizeFormat = 1, short compression = 0)
             => InvokeMethod(nameof(SaveFile), new object[] {path, format, stretch, sizeFormat, compression});
         

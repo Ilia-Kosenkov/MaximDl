@@ -10,20 +10,24 @@ internal class DataSetInfo
     public ImmutableList<IFileSystemInfo> Bias {get;}
     public ImmutableList<IFileSystemInfo> Dark {get;}
 
+    public BinType Bin {get;}
     public DataSetInfo(
         IEnumerable<IFileSystemInfo> files, 
         IEnumerable<IFileSystemInfo> bias,
-        IEnumerable<IFileSystemInfo> dark)
+        IEnumerable<IFileSystemInfo> dark,
+        BinType bin = BinType.NoBin)
     {
         Files = files?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
         Bias = bias?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
-        Dark = dark?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;;
+        Dark = dark?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
+        Bin = bin;
     }
 
     public DataSetInfo(
         IEnumerable<IFileSystemInfo> allFiles,
         string biasPattern = "_bias_",
-        string darkPattern = "_dark_")
+        string darkPattern = "_dark_",
+        BinType bin = BinType.NoBin)
     {
         var biasRegex = new Regex(biasPattern, RegexOptions.Compiled);
         var darkRegex = new Regex(darkPattern, RegexOptions.Compiled);
@@ -45,6 +49,7 @@ internal class DataSetInfo
         Files = filesBuilder.ToImmutable();
         Bias = biasBuilder.ToImmutable();
         Dark = darkBuilder.ToImmutable();
+        Bin = bin;
     }
 
     public IEnumerable<(string Source, string Target)> EnumeratePaths(
