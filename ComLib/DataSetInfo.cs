@@ -1,69 +1,96 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IO;
 using System.IO.Abstractions;
 using System.Collections.Immutable;
 using System.Linq;
 internal class DataSetInfo
 {
-    public static DataSetInfo Empty { get; } = new DataSetInfo(Enumerable.Empty<IFileSystemInfo>());
-    public ImmutableList<IFileSystemInfo> Files {get;}
-    public ImmutableList<IFileSystemInfo> Bias {get;}
-    public ImmutableList<IFileSystemInfo> Dark {get;}
+    public static DataSetInfo Empty { get; } = new DataSetInfo();
+    public ImmutableList<IFileSystemInfo> Files { get; }
+    public ImmutableList<IFileSystemInfo> Bias { get; }
+    public ImmutableList<IFileSystemInfo> Dark { get; }
+    public string OutFolder { get; }
+    public string Suffix { get; }
+    public BinType Bin { get; }
 
-    public BinType Bin {get;}
-    public DataSetInfo(
-        IEnumerable<IFileSystemInfo> files, 
-        IEnumerable<IFileSystemInfo> bias,
-        IEnumerable<IFileSystemInfo> dark,
-        BinType bin = BinType.NoBin)
+    internal DataSetInfo()
     {
-        Files = files?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
-        Bias = bias?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
-        Dark = dark?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
-        Bin = bin;
+        Files = ImmutableList<IFileSystemInfo>.Empty;
+        Bias = ImmutableList<IFileSystemInfo>.Empty;
+        Dark = ImmutableList<IFileSystemInfo>.Empty;
+        OutFolder = "calibrated";
+        Suffix = "_calib";
+        Bin = BinType.NoBin;
     }
 
-    public DataSetInfo(
-        IEnumerable<IFileSystemInfo> allFiles,
-        string biasPattern = "_bias_",
-        string darkPattern = "_dark_",
-        BinType bin = BinType.NoBin)
+    public DataSetInfo(Options opts)
     {
-        var biasRegex = new Regex(biasPattern, RegexOptions.Compiled);
-        var darkRegex = new Regex(darkPattern, RegexOptions.Compiled);
+        Bin = Enum.IsDefined(typeof(BinType), opts.Bin)
+            ? (BinType)(opts.Bin)
+            : throw new ArgumentException("Invalid binning type.", nameof(opts));
+        OutFolder = opts.OutFolder;
+        Suffix = opts.Suffix;
 
+        if(opts.Darks?.Any() ?? false)
+            Dark = 
+                (from glob in opts.Darks
+                from desc in Ganss.IO.Glob.Expand(glob)
+                select desc).ToImmutableList();
+
+        if(opts.Bias?.Any() ?? false)
+            Bias = 
+                (from glob in opts.Bias
+                from desc in Ganss.IO.Glob.Expand(glob)
+                select desc).ToImmutableList();
+
+        Regex darkPattern = Dark is null && !string.IsNullOrWhiteSpace(opts.DarkPattern)
+            ? new Regex(opts.DarkPattern)
+            : null;
+        Regex biasPattern = Bias is null && !string.IsNullOrWhiteSpace(opts.BiasPattern)
+            ? new Regex(opts.BiasPattern)
+            : null;
+
+        var darkBuilder = darkPattern is null 
+            ? null
+            : ImmutableList.CreateBuilder<IFileSystemInfo>();
+        var biasBuilder = darkPattern is null 
+            ? null
+            : ImmutableList.CreateBuilder<IFileSystemInfo>();
         var filesBuilder = ImmutableList.CreateBuilder<IFileSystemInfo>();
-        var biasBuilder = ImmutableList.CreateBuilder<IFileSystemInfo>();
-        var darkBuilder = ImmutableList.CreateBuilder<IFileSystemInfo>();
 
-        foreach(var file in allFiles)
+        foreach(var item in 
+                from glob in opts.Files
+                from desc in Ganss.IO.Glob.Expand(glob)
+                select desc)
         {
-            if(biasRegex.IsMatch(file.Name))
-                biasBuilder.Add(file);
-            else if (darkRegex.IsMatch(file.Name))
-                darkBuilder.Add(file);
+            if(darkPattern?.IsMatch(item.Name) ?? false)
+                darkBuilder.Add(item);
+            else if(biasPattern?.IsMatch(item.Name) ?? false)
+                biasBuilder.Add(item);
             else
-                filesBuilder.Add(file);
+                filesBuilder.Add(item);
         }
 
         Files = filesBuilder.ToImmutable();
-        Bias = biasBuilder.ToImmutable();
-        Dark = darkBuilder.ToImmutable();
-        Bin = bin;
+        Dark = Dark is null ? darkBuilder.ToImmutable() : Dark;
+        Bias = Bias is null ? biasBuilder.ToImmutable() : Bias;
     }
 
-    public IEnumerable<(string Source, string Target)> EnumeratePaths(
-        string folder = "calibrated", 
-        string suffix = "_calib")
+    public IEnumerable<(string Source, string Target)> EnumeratePaths()
     {
+        var isFull = Path.IsPathFullyQualified(OutFolder);
+        var extraPath = isFull ? Path.GetFullPath(OutFolder) : OutFolder;
         foreach(var item in Files)
         {
             var fullSrcPath = item.FullName;
             var targetPath = 
-                System.IO.Path.Combine(
-                    System.IO.Path.GetDirectoryName(fullSrcPath),
-                    folder, 
-                    System.IO.Path.GetFileNameWithoutExtension(fullSrcPath) + suffix + System.IO.Path.GetExtension(fullSrcPath));
+                Path.Combine(
+                    isFull 
+                        ? extraPath 
+                        : Path.Combine(Path.GetDirectoryName(fullSrcPath), extraPath), 
+                    Path.GetFileNameWithoutExtension(fullSrcPath) + Suffix + Path.GetExtension(fullSrcPath));
             yield return(Source: fullSrcPath, Target: targetPath);
         }
     }
