@@ -21,7 +21,11 @@ namespace MaximDl
                         await Calibrate(info);
                         return 0;
                     },
-                err => Task.FromResult(-1));
+                async err => 
+                {
+                    await Console.Error.WriteLineAsync(CommandLine.Text.HelpText.AutoBuild(result));
+                    return -1;
+                });
 
         }
 
