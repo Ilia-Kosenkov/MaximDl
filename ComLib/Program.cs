@@ -2,9 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.IO;
-using System.Linq;
 using CommandLine;
-using Ganss.IO;
 
 namespace MaximDl
 {
@@ -45,7 +43,15 @@ namespace MaximDl
 
             app.CalSet();
 
-
+            using var progressBar = new ShellProgressBar.ProgressBar(
+                info.Files.Count,
+                "Calibrating files...",
+                new ShellProgressBar.ProgressBarOptions()
+                {
+                    DisplayTimeInRealTime = true,
+                    EnableTaskBarProgress = true
+                }
+            );
             foreach(var item in info.EnumeratePaths())
             {
                 var task = Task.Run(() => 
@@ -59,8 +65,10 @@ namespace MaximDl
                 if(!Directory.Exists(targetDir))
                     Directory.CreateDirectory(targetDir);
                 
+                var fileName = Path.GetFileNameWithoutExtension(item.Source);
                 await task;
                 doc.SaveFile(item.Target, 3);
+                progressBar.Tick(fileName);
             }
         }
 

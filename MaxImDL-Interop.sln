@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaximDl", "ComLib\MaximDl.csproj", "{A9C251F3-75CE-44E6-97D6-75B0F16A8E58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaxImDL-Interop", "ComLib\MaxImDL-Interop.csproj", "{A9C251F3-75CE-44E6-97D6-75B0F16A8E58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

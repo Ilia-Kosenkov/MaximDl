@@ -69,8 +69,11 @@ internal class DataSetInfo
                 darkBuilder.Add(item);
             else if(biasPattern?.IsMatch(item.Name) ?? false)
                 biasBuilder.Add(item);
-            else
-                filesBuilder.Add(item);
+            else if((Dark?.Any(x => x.FullName == item.FullName) ?? false)
+                    || (Bias?.Any(x => x.FullName == item.FullName) ?? false))
+                    Console.Error.WriteLine($"File {item.FullName} is present in calibrations, ommiting...");
+                 else
+                    filesBuilder.Add(item);
         }
 
         Files = filesBuilder.ToImmutable();
