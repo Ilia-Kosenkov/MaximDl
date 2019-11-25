@@ -31,7 +31,7 @@ namespace MaximDl
         public bool CalAddBias(string path)
             => (bool)InvokeMethod(nameof(CalAddBias), path);
         public bool CalAddDark(string path)
-            => (bool)InvokeMethod(nameof(CalAddBias), path);
+            => (bool)InvokeMethod(nameof(CalAddDark), path);
 
         public bool CalSet()
             => (bool)InvokeMethod(nameof(CalSet));

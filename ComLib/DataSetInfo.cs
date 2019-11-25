@@ -16,8 +16,8 @@ internal class DataSetInfo
         IEnumerable<IFileSystemInfo> dark)
     {
         Files = files?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
-        Bias = bias?.ToImmutableList()  ?? ImmutableList<IFileSystemInfo>.Empty;
-        Bias = dark?.ToImmutableList()  ?? ImmutableList<IFileSystemInfo>.Empty;
+        Bias = bias?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;
+        Dark = dark?.ToImmutableList() ?? ImmutableList<IFileSystemInfo>.Empty;;
     }
 
     public DataSetInfo(
@@ -45,5 +45,21 @@ internal class DataSetInfo
         Files = filesBuilder.ToImmutable();
         Bias = biasBuilder.ToImmutable();
         Dark = darkBuilder.ToImmutable();
+    }
+
+    public IEnumerable<(string Source, string Target)> EnumeratePaths(
+        string folder = "calibrated", 
+        string suffix = "_calib")
+    {
+        foreach(var item in Files)
+        {
+            var fullSrcPath = item.FullName;
+            var targetPath = 
+                System.IO.Path.Combine(
+                    System.IO.Path.GetDirectoryName(fullSrcPath),
+                    folder, 
+                    System.IO.Path.GetFileNameWithoutExtension(fullSrcPath) + suffix + System.IO.Path.GetExtension(fullSrcPath));
+            yield return(Source: fullSrcPath, Target: targetPath);
+        }
     }
 }
