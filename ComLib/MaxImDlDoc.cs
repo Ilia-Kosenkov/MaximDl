@@ -13,6 +13,14 @@ namespace MaximDl
                 ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
 
+        public short MouseNewClick => (short)InvokeGetter(nameof(MouseNewClick));
+
+        public short MouseX => (short)InvokeGetter(nameof(MouseX));
+        public short MouseY => (short)InvokeGetter(nameof(MouseY));
+
+        public ObjectInfo CalcInformation(short x, short y, Ring r)
+            => (object[])InvokeMethod(nameof(CalcInformation), x, y, r.MarshalAsArray());
+
         public void OpenFile(string path)
             => InvokeMethod(nameof(OpenFile), path);
 
