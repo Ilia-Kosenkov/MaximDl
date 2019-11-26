@@ -4,9 +4,9 @@ namespace MaximDl
 {
     public sealed class MaxImDlDoc : ComType
     {
-        private static MaxImDlDoc? _instance;
+        //private static MaxImDlDoc? _instance;
 
-        private MaxImDlDoc() 
+        public MaxImDlDoc() 
             : base (@"MaxIm.Document")
         {
             ComInstance = Activator.CreateInstance(Type)
@@ -37,28 +37,7 @@ namespace MaximDl
         }
         public void SaveFile(string path, byte format, bool stretch = false, byte sizeFormat = 1, short compression = 0)
             => InvokeMethod(nameof(SaveFile), path, format, stretch, sizeFormat, compression);
-        
-        public static MaxImDlDoc Acquire()
-        {
-            if(_instance is null)
-            {
-                _instance = new MaxImDlDoc();
-                return _instance;    
-            }
-            
-            throw new InvalidOperationException("Cannot acquire instance of the ComObject because it is already in use.");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if(!IsDisposed && disposing)
-            {
-                if(ReferenceEquals(this, _instance))
-                    _instance = null;
-            }
-
-            base.Dispose(disposing);
-        }
+       
     }
 
 }

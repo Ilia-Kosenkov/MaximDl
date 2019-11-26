@@ -30,7 +30,7 @@ namespace Calibrator
         private static async Task Calibrate(DataSetInfo info)
         {
             using var app = MaxImDlApp.Acquire() ?? throw new InvalidOperationException("Failed to create app.");
-            using var doc = MaxImDlDoc.Acquire() ?? throw new InvalidOperationException("Failed to create document.");
+            using var doc = new MaxImDlDoc();
             app.CalMedianBias = true;
             app.CalMedianDark = true;
 
