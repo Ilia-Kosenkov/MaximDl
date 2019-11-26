@@ -15,6 +15,8 @@ public abstract class ComType : IDisposable
                 ?? throw new InvalidOperationException("ComType is not supported.");
     }
 
+    protected ComType(Type type) => Type = type;
+
     public void Dispose()
     {
         GC.SuppressFinalize(this);

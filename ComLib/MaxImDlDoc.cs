@@ -14,10 +14,12 @@ namespace MaximDl
                           ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
 
-        public short MouseNewClick => FromGetter<short>();
+        internal MaxImDlDoc(object comInstance) : base (@"MaxIm.Document") => ComInstance = comInstance;
 
+        public short MouseNewClick => FromGetter<short>();
         public short MouseX => FromGetter<short>();
         public short MouseY => FromGetter<short>();
+        public string DisplayName => FromGetter<string>();
 
         public ObjectInfo CalcInformation(short x, short y, Ring r) 
             => FromMethodInvoke<object[]>(nameof(CalcInformation), x, y, r.MarshalAsArray());
@@ -27,7 +29,23 @@ namespace MaximDl
 
         public void Calibrate()
             => InvokeMethod(nameof(Calibrate));
+        
+        public bool BringToTop() 
+            => FromMethodInvoke<bool>();
 
+        public bool Close() 
+            => FromMethodInvoke<bool>();
+
+
+        public int TestClose()
+        {
+            // ReleaseSelf
+            var meth = ComInstance.GetType().GetMethod(@"ReleaseSelf", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var i = (int) meth.Invoke(ComInstance, null);
+            meth = ComInstance.GetType().GetMethod(@"ReleaseAllData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            meth.Invoke(ComInstance, null);
+            return i;
+        }
         public void Bin(BinType bin)
         {
             if (bin == BinType.NoBin)
@@ -38,6 +56,14 @@ namespace MaximDl
         public void SaveFile(string path, byte format, bool stretch = false, byte sizeFormat = 1, short compression = 0)
             => InvokeMethod(nameof(SaveFile), path, format, stretch, sizeFormat, compression);
        
+
+        protected override void Dispose(bool disposing)
+        {
+            // if(!IsDisposed)
+                // Close();
+            
+            base.Dispose(disposing);
+        }
     }
 
 }

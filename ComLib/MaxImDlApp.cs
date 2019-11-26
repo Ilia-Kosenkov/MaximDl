@@ -18,6 +18,8 @@ namespace MaximDl
             set => FromSetter(value);
         }
 
+        public MaxImDlDocCollection Documents => new MaxImDlDocCollection(FromGetter<object>());
+
 
         private MaxImDlApp() 
             : base (@"MaxIm.Application")
@@ -34,6 +36,8 @@ namespace MaximDl
         public bool CalAddDark(string path) => FromMethodInvoke<bool>(args: path);
 
         public bool CalSet() => FromMethodInvoke<bool>();
+
+        public void CloseAll() => InvokeMethod(nameof(CloseAll));
 
         public MaxImDlDoc CreateDocument() => new MaxImDlDoc();
 
@@ -53,6 +57,16 @@ namespace MaximDl
         {
             if(!IsDisposed && disposing)
             {
+                CloseAll();
+                var docs = Documents;
+                var count = docs.Count;
+                for(var i = 0; i < count; i++)
+                   {
+                       var doc = docs[i];
+                       var isOk = doc.BringToTop();
+                       var id = doc.TestClose();
+                   }
+                    
                 if(ReferenceEquals(this, _instance))
                     _instance = null;
             }
