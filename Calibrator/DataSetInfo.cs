@@ -97,7 +97,7 @@ namespace Calibrator
                     Path.Combine(
                         isFull 
                             ? extraPath 
-                            : Path.Combine(Path.GetDirectoryName(fullSrcPath), extraPath), 
+                            : Path.Combine(Path.GetDirectoryName(fullSrcPath) ?? "", extraPath), 
                         Path.GetFileNameWithoutExtension(fullSrcPath) + Suffix + Path.GetExtension(fullSrcPath));
                 yield return(Source: fullSrcPath, Target: targetPath);
             }
