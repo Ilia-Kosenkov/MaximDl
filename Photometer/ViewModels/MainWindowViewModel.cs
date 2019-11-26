@@ -50,13 +50,13 @@ namespace Photometer.ViewModels
                 {
                     new FileDialogFilter()
                     {
-                        Extensions = new List<string> {".fits", ".fts"},
+                        Extensions = new List<string> {"fits", "fts"},
                         Name = "FITS files"
                     }
                 }
             };
 
-            return dialog.ShowAsync(null);
+            return dialog.ShowAsync(Avalonia.Application.Current.MainWindow);
         }
 
         public async Task<Unit> OpenDocumentsAsync(List<string> input)
