@@ -21,8 +21,8 @@ public readonly struct Ring
         Type = type;
     }
 
-    internal readonly int[] MarshalAsArray()
-        => new int[] {Aperture, Gap, Annulus, (ushort)Type};
+    internal int[] MarshalAsArray()
+        => new int[] {Aperture, Gap, Annulus, (ushort) Type};
     
 
     public static implicit operator int[](Ring r)

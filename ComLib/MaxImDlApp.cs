@@ -23,7 +23,8 @@ namespace MaximDl
             : base (@"MaxIm.Application")
         {
             ComInstance = Activator.CreateInstance(Type)
-                ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
+                          // ReSharper disable once ConstantNullCoalescingCondition
+                          ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
 
         public void CalClear()
@@ -36,7 +37,7 @@ namespace MaximDl
 
         public static MaxImDlApp Acquire()
         {
-            if(_instance is null)
+            if (_instance is null)
             {
                 _instance = new MaxImDlApp();
                 return _instance;    

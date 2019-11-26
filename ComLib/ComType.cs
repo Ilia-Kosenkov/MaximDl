@@ -5,13 +5,13 @@ public abstract class ComType : IDisposable
 {
     protected Type Type { get; }
 
-    protected object? ComInstance;
+    protected object ComInstance;
 
     public bool IsDisposed { get; private set; }
 
     protected ComType(string protoType)
     {
-        Type ??= Type.GetTypeFromProgID(protoType)
+        Type = Type.GetTypeFromProgID(protoType)
                 ?? throw new InvalidOperationException("ComType is not supported.");
     }
 

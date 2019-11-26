@@ -8,7 +8,7 @@ namespace Calibrator
 {
     internal class Program
     {
-        static async Task <int> Main(string[] args)
+        private static async Task <int> Main(string[] args)
         {
             using var parser = new Parser(x => x.EnableDashDash = true);
             var result = parser.ParseArguments<Options>(args);
@@ -29,8 +29,8 @@ namespace Calibrator
 
         private static async Task Calibrate(DataSetInfo info)
         {
-            using var app = MaxImDlApp.Acquire();
-            using var doc = MaxImDlDoc.Acquire();
+            using var app = MaxImDlApp.Acquire() ?? throw new InvalidOperationException("Failed to create app.");
+            using var doc = MaxImDlDoc.Acquire() ?? throw new InvalidOperationException("Failed to create document.");
             app.CalMedianBias = true;
             app.CalMedianDark = true;
 
@@ -56,10 +56,12 @@ namespace Calibrator
             {
                 var task = Task.Run(() => 
                 {
+                    // ReSharper disable AccessToDisposedClosure
                     doc.OpenFile(item.Source);
                     doc.Calibrate();
                     if(info.Bin != BinType.NoBin)
                         doc.Bin(info.Bin);
+                    // ReSharper restore AccessToDisposedClosure
                 });
                 var targetDir = Path.GetDirectoryName(item.Target);
                 if(!Directory.Exists(targetDir))

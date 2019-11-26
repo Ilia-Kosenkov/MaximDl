@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 public enum BinType : ushort
 {
     NoBin = 0,
