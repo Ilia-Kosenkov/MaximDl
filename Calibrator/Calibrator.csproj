@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <ApplicationIcon />
     <StartupObject />
+    <AssemblyName>dipol-calibrate</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.6.0" />
