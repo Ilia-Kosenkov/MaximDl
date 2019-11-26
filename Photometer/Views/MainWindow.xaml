@@ -12,6 +12,8 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
+        <Button Width ="100" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Load files"/>
+    </Grid>
 
 </Window>

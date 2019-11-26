@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
+    <OutputType>exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <AssemblyName>dipol-phot</AssemblyName>
+    <VersionPrefix>0.1.0</VersionPrefix>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -15,8 +16,14 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.8.2" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.8.2" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.2" />
+    <PackageReference Include="Avalonia" Version="0.8.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.8.3" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.3" />
+    <PackageReference Include="Glob.cs" Version="4.0.166" />
+    <PackageReference Include="ReactiveUI" Version="10.5.31" />
+    <PackageReference Include="System.Reactive" Version="4.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ComLib\MaxImDL-Interop.csproj" />
   </ItemGroup>
 </Project>

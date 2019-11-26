@@ -6,7 +6,7 @@ namespace MaximDl
     {
         //private static MaxImDlDoc? _instance;
 
-        public MaxImDlDoc() 
+        internal MaxImDlDoc() 
             : base (@"MaxIm.Document")
         {
             ComInstance = Activator.CreateInstance(Type)

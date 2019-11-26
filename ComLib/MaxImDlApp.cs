@@ -35,6 +35,8 @@ namespace MaximDl
 
         public bool CalSet() => FromMethodInvoke<bool>();
 
+        public MaxImDlDoc CreateDocument() => new MaxImDlDoc();
+
         public static MaxImDlApp Acquire()
         {
             if (_instance is null)
@@ -45,6 +47,7 @@ namespace MaximDl
             
             throw new InvalidOperationException("Cannot acquire instance of the ComObject because it is already in use.");
         }
+
 
         protected override void Dispose(bool disposing)
         {

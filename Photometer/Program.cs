@@ -1,12 +1,12 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Logging.Serilog;
+using MaximDl;
 using Photometer.ViewModels;
 using Photometer.Views;
 
 namespace Photometer
 {
-    class Program
+    internal class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -24,9 +24,14 @@ namespace Photometer
         // container, etc.
         private static void AppMain(Application app, string[] args)
         {
+            using var instance = MaxImDlApp.Acquire();
+            using var vm = new MainWindowViewModel()
+            {
+                AppInstance = instance
+            };
             var window = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = vm
             };
 
             app.Run(window);
