@@ -3,16 +3,15 @@ using System.Runtime.InteropServices;
 
 public abstract class ComType : IDisposable
 {
-    protected Type Type { get; private set;}
-    private bool _isDisposed;
-    protected object _comInstance;
+    protected Type Type { get; }
 
-    public bool IsDisposed => _isDisposed;
+    protected object? ComInstance;
+
+    public bool IsDisposed { get; private set; }
 
     protected ComType(string protoType)
     {
-        if(Type is null)
-            Type = Type.GetTypeFromProgID(protoType)
+        Type ??= Type.GetTypeFromProgID(protoType)
                 ?? throw new InvalidOperationException("ComType is not supported.");
     }
 
@@ -24,61 +23,77 @@ public abstract class ComType : IDisposable
 
     protected void InvokeSetter(string name, object arg)
     {
+        CheckDisposed();
+
         if(string.IsNullOrWhiteSpace(name))
             throw new ArgumentException(@"Setter name cannot be empty.", nameof(name));
 
-        if(Type is null)        
+        if(Type is null || ComInstance is null)        
             throw new InvalidOperationException("Object state is corrupted.");
 
-        var result = Type.InvokeMember(name, System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance, null, _comInstance, new object[] { arg });
+        Type.InvokeMember(name, System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance, null, ComInstance, new[] { arg });
     }
 
-    protected object InvokeGetter(string name)
+    protected object? InvokeGetter(string name)
     {
-        if(string.IsNullOrWhiteSpace(name))
+        CheckDisposed();
+
+        if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException(@"Getter name cannot be empty.", nameof(name));
 
-        if(Type is null)        
+        if(Type is null || ComInstance is null)        
             throw new InvalidOperationException("Object state is corrupted.");
 
-        return Type.InvokeMember(name, System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.Instance, null, _comInstance, Array.Empty<object>());
+        return Type.InvokeMember(name, System.Reflection.BindingFlags.GetProperty | System.Reflection.BindingFlags.Instance, null, ComInstance, Array.Empty<object>());
     }
 
-    protected object InvokeMethod(string name, params object[] args)
+    protected object? InvokeMethod(string name, params object[] args)
     {
-        if(string.IsNullOrWhiteSpace(name))
+        CheckDisposed();
+
+        if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException(@"Method name cannot be empty.", nameof(name));
 
-        if(Type is null)        
+        if(Type is null || ComInstance is null)        
             throw new InvalidOperationException("Object state is corrupted.");
 
         return Type.InvokeMember(name, 
            System.Reflection.BindingFlags.InvokeMethod | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, 
-           null, _comInstance, args);
+           null, ComInstance, args);
 
     }
 
-    protected void CheckDisosed()
+    protected void CheckDisposed()
     {
-        if(_isDisposed)
+        if(IsDisposed)
             throw new ObjectDisposedException(@"Object already disposed");
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        if(_isDisposed)
+        if(IsDisposed)
             return;
         
         if(disposing)
         {
         }
 
-        if(!(_comInstance is null))
-            Marshal.ReleaseComObject(_comInstance);
+        if(!(ComInstance is null))
+            Marshal.ReleaseComObject(ComInstance);
         
-        _isDisposed = true;
+        IsDisposed = true;
     }
 
+    protected T FromGetter<T>([System.Runtime.CompilerServices.CallerMemberName] string prop = "")
+        => (T)(InvokeGetter(prop) ?? throw new InvalidOperationException($"Unexpected property ({prop}) return value."));
+
+    protected void FromSetter<T>(T value, [System.Runtime.CompilerServices.CallerMemberName]string prop = "")
+        => InvokeSetter(prop, value!);
+
+    protected T FromMethodInvoke<T>([System.Runtime.CompilerServices.CallerMemberName]
+        string method = "", params object[] args)
+        => (T) (InvokeMethod(method, args) ??
+                throw new InvalidOperationException($"Unexpected method ({method}) return value."));
     ~ComType()
     {
         Dispose(false);

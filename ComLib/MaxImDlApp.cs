@@ -4,37 +4,35 @@ namespace MaximDl
 {
     public sealed class MaxImDlApp : ComType
     {
-        private static MaxImDlApp _instance;
+        private static MaxImDlApp? _instance;
 
-        public bool CalMedianBias 
+        public bool CalMedianBias
         {
-            get => (bool)InvokeGetter(nameof(CalMedianBias));
-            set => InvokeSetter(nameof(CalMedianBias), value);
+            get => FromGetter<bool>();
+            set => FromSetter(value);
         }
 
         public bool CalMedianDark 
         {
-            get => (bool)InvokeGetter(nameof(CalMedianDark));
-            set => InvokeSetter(nameof(CalMedianDark), value);
+            get => FromGetter<bool>();
+            set => FromSetter(value);
         }
 
 
         private MaxImDlApp() 
             : base (@"MaxIm.Application")
         {
-            _comInstance = Activator.CreateInstance(Type)
+            ComInstance = Activator.CreateInstance(Type)
                 ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
 
         public void CalClear()
             => InvokeMethod(nameof(CalClear), Array.Empty<object>());
-        public bool CalAddBias(string path)
-            => (bool)InvokeMethod(nameof(CalAddBias), path);
-        public bool CalAddDark(string path)
-            => (bool)InvokeMethod(nameof(CalAddDark), path);
 
-        public bool CalSet()
-            => (bool)InvokeMethod(nameof(CalSet));
+        public bool CalAddBias(string path) => FromMethodInvoke<bool>(args: path);
+        public bool CalAddDark(string path) => FromMethodInvoke<bool>(args: path);
+
+        public bool CalSet() => FromMethodInvoke<bool>();
 
         public static MaxImDlApp Acquire()
         {
@@ -44,7 +42,7 @@ namespace MaximDl
                 return _instance;    
             }
             
-            throw new InvalidOperationException("Cannot acquire instance of the ComObject because it is alread in use.");
+            throw new InvalidOperationException("Cannot acquire instance of the ComObject because it is already in use.");
         }
 
         protected override void Dispose(bool disposing)

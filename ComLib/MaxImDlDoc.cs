@@ -9,7 +9,7 @@ namespace MaximDl
         private MaxImDlDoc() 
             : base (@"MaxIm.Document")
         {
-            _comInstance = Activator.CreateInstance(Type)
+            ComInstance = Activator.CreateInstance(Type)
                 ?? throw new InvalidOperationException("Failed to acquire look on the ComObject.");
         }
 
