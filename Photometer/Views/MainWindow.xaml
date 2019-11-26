@@ -12,7 +12,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
+    <Grid ColumnDefinitions="150,150,150" RowDefinitions="50,50">
         <Button Width ="100" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Load files" Command="{Binding LoadFilesCommand}"/>
     </Grid>
 

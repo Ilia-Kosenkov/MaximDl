@@ -69,7 +69,6 @@ namespace Photometer.ViewModels
                     doc.OpenFile(item);
                 });
             }
-
             return Unit.Default;
         }
 

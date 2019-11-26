@@ -24,17 +24,19 @@ namespace Photometer
         // container, etc.
         private static void AppMain(Application app, string[] args)
         {
-            using var instance = MaxImDlApp.Acquire();
-            using var vm = new MainWindowViewModel()
+            using(var instance = MaxImDlApp.Acquire())
             {
-                AppInstance = instance
-            };
-            var window = new MainWindow
-            {
-                DataContext = vm
-            };
+                using var vm = new MainWindowViewModel()
+                {
+                    AppInstance = instance
+                };
+                var window = new MainWindow
+                {
+                    DataContext = vm
+                };
 
-            app.Run(window);
+                app.Run(window);
+            }
         }
     }
 }
