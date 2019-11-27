@@ -73,6 +73,7 @@ public abstract class ComType : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
+        Console.WriteLine($"In dispose of {GetType()}");
         if(IsDisposed)
             return;
         
@@ -105,6 +106,8 @@ public abstract class ComType : IDisposable
     #endregion
     ~ComType()
     {
+        Console.WriteLine($"In finalize of {GetType()}");
+
         Dispose(false);
     }
 
