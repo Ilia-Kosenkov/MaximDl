@@ -19,7 +19,8 @@ namespace MaximDl
         internal MaxImDlDoc(object comInstance) : base (@"MaxIm.Document") => ComInstance = comInstance;
 
         public bool MouseUp => FromGetter<bool>();
-        public bool MouseDown => FromGetter<bool>();
+        // It seems the property is not defined or the name is incorrect
+        public bool MouseDown => !MouseUp;//FromGetter<bool>();
         public short MouseNewClick => FromGetter<short>();
         public short MouseX => FromGetter<short>();
         public short MouseY => FromGetter<short>();
@@ -27,6 +28,7 @@ namespace MaximDl
         public short MouseGapWidth => FromGetter<short>();
         public short MouseAnnulusWidth => FromGetter<short>();
         public string DisplayName => FromGetter<string>();
+        public (short X, short Y) MousePosition => (MouseX, MouseY);
 
         public ObjectInfo CalcInformation(short x, short y, Ring r) 
             => FromMethodInvoke<object[]>(nameof(CalcInformation), x, y, r.MarshalAsArray());
