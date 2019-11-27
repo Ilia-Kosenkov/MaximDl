@@ -58,6 +58,9 @@ namespace MaximDl
 
         public Task<bool> AwaitMouseNewClickEventAsync(TimeSpan timeout)
             => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0, timeout));
+
+        public Task AwaitMouseNewClickEventAsync()
+            => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0));
     }
 
 }
