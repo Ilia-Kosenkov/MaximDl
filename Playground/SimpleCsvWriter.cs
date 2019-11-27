@@ -41,6 +41,7 @@ namespace Playground
                 "StDev_1",
                 "Flux_2",
                 "SNR_2",
+                "StDev_2",
                 "DMag"
             };
 
@@ -64,10 +65,10 @@ namespace Playground
                     {
                         $"{item.Id:D4}",
                         $"{item.Mjd:F6}",
-                        $"{-2.5 * Math.Log10(dataItem.FirstResult.FullIntensity):E10}",
+                        $"{dataItem.FirstResult.FullIntensity:E10}",
                         $"{dataItem.FirstResult.SNR:F6}",
                         $"{dataItem.FirstResult.StdDev:E6}",
-                        $"{-2.5 * Math.Log10(dataItem.SecondResult.FullIntensity):E10}",
+                        $"{dataItem.SecondResult.FullIntensity:E10}",
                         $"{dataItem.SecondResult.SNR:F6}",
                         $"{dataItem.FirstResult.StdDev:E6}",
                         $"{-2.5 * Math.Log10(dataItem.FirstResult.FullIntensity / dataItem.SecondResult.FullIntensity):E10}"
