@@ -66,7 +66,7 @@ namespace Playground
                         firstDoc.MouseRadius,
                         firstDoc.MouseGapWidth,
                         firstDoc.MouseAnnulusWidth);
-                    Info("Input recorded.");
+                    Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
 
                     Info($"Awaiting user input: second ray of star {i + 1}.");
                     while (true)
@@ -82,7 +82,7 @@ namespace Playground
                         firstDoc.MouseRadius,
                         firstDoc.MouseGapWidth,
                         firstDoc.MouseAnnulusWidth);
-                    Info("Input recorded.");
+                    Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
 
 
                     if (secondRing != firstRing)

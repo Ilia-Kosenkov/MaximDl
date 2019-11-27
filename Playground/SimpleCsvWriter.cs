@@ -63,7 +63,7 @@ namespace Playground
                     var dataItem = data[i];
                     var strs = new[]
                     {
-                        $"{item.Id:D4}",
+                        $"{Environment.NewLine}{item.Id:D4}",
                         $"{item.Mjd:F6}",
                         $"{dataItem.FirstResult.FullIntensity:E10}",
                         $"{dataItem.FirstResult.SNR:F6}",
@@ -73,7 +73,7 @@ namespace Playground
                         $"{dataItem.FirstResult.StdDev:E6}",
                         $"{-2.5 * Math.Log10(dataItem.FirstResult.FullIntensity / dataItem.SecondResult.FullIntensity):E10}"
                     };
-                    await _internalWriter.WriteLineAsync(strs.Aggregate((old, @new) => old + "," + @new));
+                    await _internalWriter.WriteAsync(strs.Aggregate((old, @new) => old + "," + @new));
                 }
                 catch (Exception e)
                 {
