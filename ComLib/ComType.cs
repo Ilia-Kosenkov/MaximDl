@@ -5,7 +5,7 @@ public abstract class ComType : IDisposable
 {
     protected Type Type { get; }
 
-    protected object ComInstance;
+    public object? ComInstance;
 
     public bool IsDisposed { get; private set; }
 
@@ -67,7 +67,7 @@ public abstract class ComType : IDisposable
 
     protected void CheckDisposed()
     {
-        if(IsDisposed)
+        if(IsDisposed || ComInstance is null)
             throw new ObjectDisposedException(@"Object already disposed");
     }
 
@@ -80,9 +80,12 @@ public abstract class ComType : IDisposable
         {
         }
 
-        if(!(ComInstance is null))
+        if (!(ComInstance is null))
+        {
             Marshal.ReleaseComObject(ComInstance);
-        
+            ComInstance = null;
+        }
+
         IsDisposed = true;
     }
 
