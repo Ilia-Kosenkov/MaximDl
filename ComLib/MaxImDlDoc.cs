@@ -18,9 +18,9 @@ namespace MaximDl
 
         internal MaxImDlDoc(object comInstance) : base (@"MaxIm.Document") => ComInstance = comInstance;
 
-        public bool MouseUp => FromGetter<short>() != 0;
-        public bool MouseDown => FromGetter<short>() != 0;
-        public bool MouseNewClick => FromGetter<short>() != 0;
+        public bool MouseUp => FromGetter<bool>();
+        public bool MouseDown => FromGetter<bool>();
+        public short MouseNewClick => FromGetter<short>();
         public short MouseX => FromGetter<short>();
         public short MouseY => FromGetter<short>();
         public short MouseRadius => FromGetter<short>();
@@ -55,7 +55,7 @@ namespace MaximDl
 
 
         public Task<bool> AwaitMouseNewClickEventAsync(TimeSpan timeout)
-            => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick, timeout));
+            => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0, timeout));
         public Task<bool> AwaitMouseUpEventAsync(TimeSpan timeout)
             => Task.Run(() => SpinWait.SpinUntil(() => MouseUp, timeout));
         public Task<bool> AwaitMouseDownEventAsync(TimeSpan timeout)
@@ -66,7 +66,7 @@ namespace MaximDl
             var result = EventType.None;
             EventType PollEvent()
             {
-                var isNew = MouseNewClick;
+                var isNew = MouseNewClick != 0;
                 var isUp = MouseUp;
                 var isDown = MouseDown;
 
