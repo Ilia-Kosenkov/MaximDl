@@ -50,7 +50,7 @@ namespace MaximDl
 
         Enumerator GetEnumerator()
         {
-            return default;
+            return new Enumerator(this);
         }
 
         IEnumerator<MaxImDlDoc> IEnumerable<MaxImDlDoc>.GetEnumerator()
