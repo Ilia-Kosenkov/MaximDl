@@ -32,8 +32,12 @@ namespace Playground
 
                 for(var i = 0; i < n; i++)
                 {
-                    while(!firstDoc.MouseDown)
+                    while(true)
+                    {
                         await firstDoc.AwaitMouseNewClickEventAsync();
+                        if(firstDoc.MouseDown)
+                            break;
+                    }
                     
                     var firstRay = firstDoc.MousePosition;
                     var firstRing = new Ring(
@@ -41,8 +45,13 @@ namespace Playground
                         firstDoc.MouseGapWidth,
                         firstDoc.MouseAnnulusWidth);
 
-                    while (!firstDoc.MouseDown)
+                    while(true)
+                    {
                         await firstDoc.AwaitMouseNewClickEventAsync();
+                        if(firstDoc.MouseDown)
+                            break;
+                    }
+                    
 
                     var secondRay = firstDoc.MousePosition;
                     var secondRing = new Ring(
@@ -93,25 +102,27 @@ namespace Playground
         private static void ShowResults(int id, IReadOnlyList<ResultItem> data)
         {
             static string GenerateString(ObjectInfo info) 
-                => $"{info.X, 6:F2} | {info.Y, 6:F2} | {info.FullIntensity, 12:E3} | {info.SNR, 6:F2}";
+                => $"{info.X, 6:F2} | {info.Y, 6:F2} | {info.FullIntensity, 12:E5} | {info.SNR, 6:F2}";
 
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 
             var header = $"{("X"), 6} | {("Y"), 6} | {("Int"), 12} | {("SNR"), 6}";
+            var @break = new string('-', 2 * header.Length + 22);
             lock (Locker)
             {
-                Console.WriteLine($"Star {id:000}" + new string('-', 2 * header.Length + 12));
-                Console.WriteLine(new string('-', 2 * header.Length + 20));
+                Console.WriteLine(@break);
+                Console.WriteLine($">> Star {id:000}");
+                Console.WriteLine(@break);
                 Console.WriteLine($"    | {{0, {header.Length}}} | {{1, {header.Length}}} |", "Ray 1", "Ray 2");
-                Console.WriteLine(new string('-', 2 * header.Length + 20));
+                Console.WriteLine(@break);
                 Console.WriteLine($" Id | {header} | {header} | dMag");
-                Console.WriteLine(new string('-', 2 * header.Length + 20));
+                Console.WriteLine(@break);
 
                 for (var i = 0; i < data.Count; i++)
-                    Console.WriteLine($"{i:000} " +
-                                      $"| {GenerateString(data[i].FirstResult),40} " +
-                                      $"| {GenerateString(data[i].SecondResult),40} " +
+                    Console.WriteLine($"{i + 1:000} " +
+                                      $"| {GenerateString(data[i].FirstResult)} " +
+                                      $"| {GenerateString(data[i].SecondResult)} " +
                                       $"| {-2.5 * Math.Log10(data[i].FirstResult.FullIntensity / data[i].SecondResult.FullIntensity),8:F3}");
             }
         }
