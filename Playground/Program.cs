@@ -27,25 +27,37 @@ namespace Playground
                 using var firstDoc = docs[0];
                 firstDoc.BringToTop();
 
+                // DATE-OBS
+                var dates = docs.Select(d =>
+                {
+                    using (d)
+                    {
+                        return d.GetFITSKey(@"DATE=OBS");
+                    }
+                }).ToList();
+
                 var starDescs = new List<CoordDesc>(n);
 
 
                 for(var i = 0; i < n; i++)
                 {
+                    Info($"Awaiting user input: first ray of star {i+1}.");
                     while(true)
                     {
                         await firstDoc.AwaitMouseNewClickEventAsync();
                         if(firstDoc.MouseDown)
                             break;
                     }
-                    
+
                     var firstRay = firstDoc.MousePosition;
                     var firstRing = new Ring(
                         firstDoc.MouseRadius,
                         firstDoc.MouseGapWidth,
                         firstDoc.MouseAnnulusWidth);
+                    Info("Input recorded.");
 
-                    while(true)
+                    Info($"Awaiting user input: second ray of star {i + 1}.");
+                    while (true)
                     {
                         await firstDoc.AwaitMouseNewClickEventAsync();
                         if(firstDoc.MouseDown)
@@ -58,6 +70,8 @@ namespace Playground
                         firstDoc.MouseRadius,
                         firstDoc.MouseGapWidth,
                         firstDoc.MouseAnnulusWidth);
+                    Info("Input recorded.");
+
 
                     if (secondRing != firstRing)
                         Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
@@ -132,7 +146,18 @@ namespace Playground
             lock (Locker)
             {
                 var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}] >> {s}");
+                Console.ForegroundColor = color;
+            }
+        }
+
+        private static void Info(string s)
+        {
+            lock (Locker)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}] >> {s}");
                 Console.ForegroundColor = color;
             }
