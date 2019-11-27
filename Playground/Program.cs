@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Linq;
 using MaximDl;
@@ -13,7 +14,8 @@ namespace Playground
         {
             const string pathGlob = @"C:\NOT_July2019\Correct\Data\Polarization\Night_1\binned_X_3\V\*.fits";
             const int n = 2;
-
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
             using var app = MaxImDlApp.Acquire();
             var files = Ganss.IO.Glob.Expand(pathGlob);
             foreach(var item in files.Take(8))
@@ -29,12 +31,21 @@ namespace Playground
 
                 // DATE-OBS
                 var dates = docs.Select(d =>
-                {
-                    using (d)
                     {
-                        return d.GetFITSKey(@"DATE=OBS");
-                    }
-                }).ToList();
+                        using (d)
+                        {
+                            return DateTimeOffset.TryParse(
+                                d.GetFITSKey(@"DATE-OBS") as string,
+                                DateTimeFormatInfo.InvariantInfo,
+                                DateTimeStyles.AssumeUniversal,
+                                out var dt)
+                                ? dt
+                                : default;
+                        }
+                    })
+                    .Select((x, j) => (Date: x, Mjd: DateToMjd(x), Id: j))
+                    .OrderBy(x => x.Mjd)
+                    .ToList();
 
                 var starDescs = new List<CoordDesc>(n);
 
@@ -84,7 +95,7 @@ namespace Playground
                 var id = 0;
                 foreach (var item in results)
                 {
-                    ShowResults(++id, item.Value);
+                    ShowResults(++id, item.Value, dates);
                 }
             }
 
@@ -99,7 +110,9 @@ namespace Playground
                         doc.CalcInformation(desc.FirstPosition.X, desc.FirstPosition.Y, desc.Aperture),
                         doc.CalcInformation(desc.SecondPosition.X, desc.SecondPosition.Y, desc.Aperture)));
 
-        private static Dictionary<CoordDesc, List<ResultItem>> MeasureAll(MaxImDlDocCollection docs, IReadOnlyList<CoordDesc> descs)
+        private static Dictionary<CoordDesc, List<ResultItem>> MeasureAll(
+            MaxImDlDocCollection docs, 
+            IReadOnlyList<CoordDesc> descs)
         {
             var result = descs.ToDictionary(x => x, y => new List<ResultItem>(docs.Count));
             foreach(var doc in docs)
@@ -113,16 +126,18 @@ namespace Playground
             return result;
         }
 
-        private static void ShowResults(int id, IReadOnlyList<ResultItem> data)
+        private static void ShowResults(
+            int id, 
+            IReadOnlyList<ResultItem> data,
+            IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData)
         {
             static string GenerateString(ObjectInfo info) 
                 => $"{info.X, 6:F2} | {info.Y, 6:F2} | {info.FullIntensity, 12:E5} | {info.SNR, 6:F2}";
 
-            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
 
             var header = $"{("X"), 6} | {("Y"), 6} | {("Int"), 12} | {("SNR"), 6}";
-            var @break = new string('-', 2 * header.Length + 22);
+            var @break = new string('-', 2 * header.Length + 24);
             lock (Locker)
             {
                 Console.WriteLine(@break);
@@ -134,10 +149,13 @@ namespace Playground
                 Console.WriteLine(@break);
 
                 for (var i = 0; i < data.Count; i++)
-                    Console.WriteLine($"{i + 1:000} " +
-                                      $"| {GenerateString(data[i].FirstResult)} " +
-                                      $"| {GenerateString(data[i].SecondResult)} " +
-                                      $"| {-2.5 * Math.Log10(data[i].FirstResult.FullIntensity / data[i].SecondResult.FullIntensity),8:F3}");
+                {
+                    var localMetaData = metaData[i];
+                    Console.WriteLine($"{localMetaData.Id + 1:000} " +
+                                      $"| {GenerateString(data[localMetaData.Id].FirstResult)} " +
+                                      $"| {GenerateString(data[localMetaData.Id].SecondResult)} " +
+                                      $"| {-2.5 * Math.Log10(data[localMetaData.Id].FirstResult.FullIntensity / data[localMetaData.Id].SecondResult.FullIntensity),10:F6}");
+                }
             }
         }
 
@@ -162,5 +180,10 @@ namespace Playground
                 Console.ForegroundColor = color;
             }
         }
+
+        private static readonly DateTimeOffset MjdZero = new DateTimeOffset(1858, 11, 17, 0, 0, 0, TimeSpan.Zero);
+
+        private static double DateToMjd(DateTimeOffset date)
+            => (date - MjdZero).TotalDays;
     }
 }

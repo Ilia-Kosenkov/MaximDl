@@ -46,7 +46,7 @@ namespace MaximDl
             => FromMethodInvoke<bool>();
 
         // ReSharper disable once InconsistentNaming
-        public object? GetFITSKey(string keyName)
+        public object GetFITSKey(string keyName)
             => FromMethodInvoke<object>(args: keyName);
 
         public void Bin(BinType bin)
