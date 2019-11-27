@@ -29,12 +29,3 @@ public enum ImageType : byte
     Png = 7,
     Bmp = 8
 }
-
-[Flags]
-public enum EventType : byte
-{
-    None = 0,
-    MouseNewClick = 1,
-    MouseUp = 2,
-    MouseDown = 4
-}

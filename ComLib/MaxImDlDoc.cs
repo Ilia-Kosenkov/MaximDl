@@ -56,35 +56,6 @@ namespace MaximDl
 
         public Task<bool> AwaitMouseNewClickEventAsync(TimeSpan timeout)
             => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0, timeout));
-        public Task<bool> AwaitMouseUpEventAsync(TimeSpan timeout)
-            => Task.Run(() => SpinWait.SpinUntil(() => MouseUp, timeout));
-        public Task<bool> AwaitMouseDownEventAsync(TimeSpan timeout)
-            => Task.Run(() => SpinWait.SpinUntil(() => MouseDown, timeout));
-
-        public async Task<EventType> AwaitAnyMouseEventAsync(TimeSpan timeout)
-        {
-            var result = EventType.None;
-            EventType PollEvent()
-            {
-                var isNew = MouseNewClick != 0;
-                var isUp = MouseUp;
-                var isDown = MouseDown;
-
-
-                if (isNew)
-                    result |= EventType.MouseNewClick;
-                if (isUp)
-                    result |= EventType.MouseUp;
-                if (isDown)
-                    result |= EventType.MouseDown;
-
-                return result;
-            }
-
-
-            await Task.Run(() => SpinWait.SpinUntil(() => PollEvent() != EventType.None, timeout));
-            return result;
-        }
     }
 
 }
