@@ -11,7 +11,7 @@ namespace Playground
     {
 
         private readonly TextWriter _internalWriter;
-        private readonly string? _path = null;
+        private readonly string? _path;
 
         public SimpleCsvWriter(string path)
         {
@@ -42,7 +42,7 @@ namespace Playground
                 "Flux_2",
                 "SNR_2",
                 "StDev_2",
-                "DMag"
+                "Obj1" // For compatibility with older {Dipol2Red} package
             };
 
             try

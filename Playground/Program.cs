@@ -19,7 +19,8 @@ namespace Playground
             System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
             using var app = MaxImDlApp.Acquire();
             var files = Ganss.IO.Glob.Expand(pathGlob);
-            foreach(var item in files.Take(8))
+            
+            foreach(var item in files)//.Take(8))
             {
                 using var doc = app.CreateDocument();
                 doc.OpenFile(item.FullName);
@@ -51,9 +52,9 @@ namespace Playground
                 var starDescs = new List<CoordDesc>(n);
 
 
-                for(var i = 0; i < n; i++)
+                for(var i = 1; i <= n; i++)
                 {
-                    Info($"Awaiting user input: first ray of star {i+1}.");
+                    Info($"Awaiting user input: first ray of star {i}/{n}.");
                     while(true)
                     {
                         await firstDoc.AwaitMouseNewClickEventAsync();
@@ -68,7 +69,7 @@ namespace Playground
                         firstDoc.MouseAnnulusWidth);
                     Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
 
-                    Info($"Awaiting user input: second ray of star {i + 1}.");
+                    Info($"Awaiting user input: second ray of star {i}/{n}.");
                     while (true)
                     {
                         await firstDoc.AwaitMouseNewClickEventAsync();
