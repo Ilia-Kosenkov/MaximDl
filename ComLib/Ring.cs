@@ -1,3 +1,5 @@
+using System;
+
 public enum ImagePlaneType : ushort
 {
     MonochromeOrAverage = 0,
@@ -6,14 +8,14 @@ public enum ImagePlaneType : ushort
     Blue = 3
 }
 
-public readonly struct Ring
+public readonly struct Ring : IEquatable<Ring>
 {
-    public ushort Aperture {get;}
-    public ushort Gap {get;}
-    public ushort Annulus {get;}
+    public short Aperture {get;}
+    public short Gap {get;}
+    public short Annulus {get;}
     public ImagePlaneType Type {get;}
 
-    public Ring(ushort aperture, ushort gap, ushort annulus, ImagePlaneType type = ImagePlaneType.MonochromeOrAverage)
+    public Ring(short aperture, short gap, short annulus, ImagePlaneType type = ImagePlaneType.MonochromeOrAverage)
     {
         Aperture = aperture;
         Gap = gap;
@@ -22,9 +24,33 @@ public readonly struct Ring
     }
 
     internal int[] MarshalAsArray()
-        => new int[] {Aperture, Gap, Annulus, (ushort) Type};
+        => new int[] {Aperture, Gap, Annulus, (short) Type};
     
 
     public static implicit operator int[](Ring r)
         => r.MarshalAsArray();
+
+    public bool Equals(Ring other) 
+        => Aperture == other.Aperture && Gap == other.Gap && Annulus == other.Annulus && Type == other.Type;
+
+    public override bool Equals(object? obj) 
+        => obj is Ring other && Equals(other);
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = Aperture.GetHashCode();
+            hashCode = (hashCode * 397) ^ Gap.GetHashCode();
+            hashCode = (hashCode * 397) ^ Annulus.GetHashCode();
+            hashCode = (hashCode * 397) ^ (int) Type;
+            return hashCode;
+        }
+    }
+
+    public static bool operator ==(Ring left, Ring right) 
+        => left.Equals(right);
+
+    public static bool operator !=(Ring left, Ring right)
+        => !left.Equals(right);
 }
