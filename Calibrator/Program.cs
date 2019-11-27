@@ -69,7 +69,7 @@ namespace Calibrator
                 
                 var fileName = Path.GetFileNameWithoutExtension(item.Source);
                 await task;
-                doc.SaveFile(item.Target, 3);
+                doc.SaveFile(item.Target);
                 progressBar.Tick(fileName);
             }
         }

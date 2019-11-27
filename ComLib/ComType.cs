@@ -17,8 +17,8 @@ public abstract class ComType : IDisposable
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     protected void InvokeSetter(string name, object arg)
