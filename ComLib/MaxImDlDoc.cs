@@ -18,9 +18,9 @@ namespace MaximDl
 
         internal MaxImDlDoc(object comInstance) : base (@"MaxIm.Document") => ComInstance = comInstance;
 
-        public bool MouseUp => FromGetter<bool>();
-        public bool MouseDown => FromGetter<bool>();
-        public bool MouseNewClick => FromGetter<bool>();
+        public bool MouseUp => FromGetter<short>() != 0;
+        public bool MouseDown => FromGetter<short>() != 0;
+        public bool MouseNewClick => FromGetter<short>() != 0;
         public short MouseX => FromGetter<short>();
         public short MouseY => FromGetter<short>();
         public short MouseRadius => FromGetter<short>();
