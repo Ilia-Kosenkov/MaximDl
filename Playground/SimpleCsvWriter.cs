@@ -11,11 +11,18 @@ namespace Playground
     {
 
         private readonly TextWriter _internalWriter;
+        private readonly string? _path = null;
 
-        public SimpleCsvWriter(string path) =>
+        public SimpleCsvWriter(string path)
+        {
+            if(string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException("Path cannot be empty/null.", nameof(path));
+
             _internalWriter = new StreamWriter(
                 new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write),
                 Encoding.UTF8);
+            _path = path;
+        }
 
         public SimpleCsvWriter(Stream str) 
             => _internalWriter = new StreamWriter(str, Encoding.UTF8, leaveOpen: true);
@@ -24,6 +31,7 @@ namespace Playground
             IReadOnlyList<ResultItem> data,
             IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData)
         {
+            Program.Info($"Saving {(_path ?? "file")}");
             var header = new[]
             {
                 "Id",
@@ -54,7 +62,7 @@ namespace Playground
                     var dataItem = data[i];
                     var strs = new[]
                     {
-                        $"{item.Id:I4}",
+                        $"{item.Id:D4}",
                         $"{item.Mjd:F6}",
                         $"{-2.5 * Math.Log10(dataItem.FirstResult.FullIntensity):E10}",
                         $"{dataItem.FirstResult.SNR:F6}",
