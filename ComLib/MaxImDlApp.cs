@@ -58,15 +58,6 @@ namespace MaximDl
             if(!IsDisposed && disposing)
             {
                 CloseAll();
-                var docs = Documents;
-                var count = docs.Count;
-                for(var i = 0; i < count; i++)
-                   {
-                       var doc = docs[i];
-                       var isOk = doc.BringToTop();
-                       var id = doc.TestClose();
-                   }
-                    
                 if(ReferenceEquals(this, _instance))
                     _instance = null;
             }

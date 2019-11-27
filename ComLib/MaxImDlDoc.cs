@@ -36,16 +36,6 @@ namespace MaximDl
         public bool Close() 
             => FromMethodInvoke<bool>();
 
-
-        public int TestClose()
-        {
-            // ReleaseSelf
-            var meth = ComInstance.GetType().GetMethod(@"ReleaseSelf", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var i = (int) meth.Invoke(ComInstance, null);
-            meth = ComInstance.GetType().GetMethod(@"ReleaseAllData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            meth.Invoke(ComInstance, null);
-            return i;
-        }
         public void Bin(BinType bin)
         {
             if (bin == BinType.NoBin)
