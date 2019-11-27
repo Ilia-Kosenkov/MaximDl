@@ -45,15 +45,6 @@ namespace MaximDl
         }
         public void SaveFile(string path, byte format, bool stretch = false, byte sizeFormat = 1, short compression = 0)
             => InvokeMethod(nameof(SaveFile), path, format, stretch, sizeFormat, compression);
-       
-
-        protected override void Dispose(bool disposing)
-        {
-            // if(!IsDisposed)
-                // Close();
-            
-            base.Dispose(disposing);
-        }
     }
 
 }

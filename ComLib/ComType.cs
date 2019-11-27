@@ -5,17 +5,15 @@ public abstract class ComType : IDisposable
 {
     protected Type Type { get; }
 
-    public object? ComInstance;
+    protected object? ComInstance;
 
     public bool IsDisposed { get; private set; }
 
     protected ComType(string protoType)
-    {
-        Type = Type.GetTypeFromProgID(protoType)
-                ?? throw new InvalidOperationException("ComType is not supported.");
-    }
+        => Type = Type.GetTypeFromProgID(protoType) ?? throw new InvalidOperationException("ComType is not supported.");
 
-    protected ComType(Type type) => Type = type;
+    protected ComType(Type type)
+        => Type = type.IsCOMObject ? type : throw new ArgumentException("Provided type is not COM type.", nameof(type));
 
     public void Dispose()
     {
@@ -73,7 +71,6 @@ public abstract class ComType : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        Console.WriteLine($"In dispose of {GetType()}");
         if(IsDisposed)
             return;
         
@@ -101,13 +98,8 @@ public abstract class ComType : IDisposable
         => (T) (InvokeMethod(method, args) ??
                 throw new InvalidOperationException($"Unexpected method ({method}) return value."));
 
-    #region UNSAFE
-    public int FinalRelease() => ComInstance is null ? int.MinValue : Marshal.FinalReleaseComObject(ComInstance);
-    #endregion
     ~ComType()
     {
-        Console.WriteLine($"In finalize of {GetType()}");
-
         Dispose(false);
     }
 
