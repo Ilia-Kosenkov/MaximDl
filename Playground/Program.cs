@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using MaximDl;
@@ -92,15 +93,34 @@ namespace Playground
 
                 var results = MeasureAll(docs, starDescs);
 
+                var jobs = GenerateOutPaths(starDescs)
+                    .Zip(results)
+                    .Select(async x =>
+                    {
+                        var (first, (_, value)) = x;
+                        using var str = new SimpleCsvWriter(first);
+                        await str.Dump(value, dates);
+                    })
+                    .ToArray();
+
                 var id = 0;
                 foreach (var item in results)
                 {
                     ShowResults(++id, item.Value, dates);
                 }
+
+                await Task.WhenAll(jobs);
             }
 
 
             app.CloseAll();
+        }
+
+        private static IEnumerable<string> GenerateOutPaths(IReadOnlyList<CoordDesc> starDescs)
+        {
+            if (!Directory.Exists(@"test"))
+                Directory.CreateDirectory(@"test");
+            return starDescs.Select((x, locId) => $@"test\{locId}_{x.Aperture.Aperture}.csv").Select(Path.GetFullPath);
         }
 
         private static Dictionary<CoordDesc, ResultItem> Measure(MaxImDlDoc doc, IEnumerable<CoordDesc> descs) =>
@@ -159,7 +179,7 @@ namespace Playground
             }
         }
 
-        private static void Warn(string s)
+        public static void Warn(string s)
         {
             lock (Locker)
             {
@@ -170,7 +190,7 @@ namespace Playground
             }
         }
 
-        private static void Info(string s)
+        public static void Info(string s)
         {
             lock (Locker)
             {
