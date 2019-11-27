@@ -96,6 +96,10 @@ public abstract class ComType : IDisposable
         string method = "", params object[] args)
         => (T) (InvokeMethod(method, args) ??
                 throw new InvalidOperationException($"Unexpected method ({method}) return value."));
+
+    #region UNSAFE
+    public int FinalRelease() => ComInstance is null ? int.MinValue : Marshal.FinalReleaseComObject(ComInstance);
+    #endregion
     ~ComType()
     {
         Dispose(false);
