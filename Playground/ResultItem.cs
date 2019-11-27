@@ -2,13 +2,13 @@
 {
     internal struct ResultItem
     {
-        public ObjectInfo ResultFirst { get; }
-        public ObjectInfo ResultSecond { get; }
+        public ObjectInfo FirstResult { get; }
+        public ObjectInfo SecondResult { get; }
 
-        public ResultItem(in ObjectInfo resultFirst, in ObjectInfo resultSecond)
+        public ResultItem(in ObjectInfo firstResult, in ObjectInfo secondResult)
         {
-            ResultFirst = resultFirst;
-            ResultSecond = resultSecond;
+            FirstResult = firstResult;
+            SecondResult = secondResult;
         }
     }
 }
