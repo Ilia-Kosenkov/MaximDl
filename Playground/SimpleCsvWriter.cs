@@ -52,7 +52,7 @@ namespace Playground
                 "SNR_2",
                 "StDev_2",
                 //"Obj1" // For compatibility with older {Dipol2Red} package
-                "dMag"
+                "DeltaMag"
             };
 
             try
