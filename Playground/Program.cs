@@ -274,7 +274,7 @@ namespace Playground
             lock (Locker)
             {
                 var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}] >> {s}");
                 Console.ForegroundColor = color;
             }
