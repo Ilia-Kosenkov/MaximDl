@@ -183,7 +183,7 @@ namespace Playground
             while (true)
             {
 
-                Info($"Awaiting user input: first ray of star {i}.");
+                Info($"Awaiting user input: first ray of star ##{i}.");
                 while (true)
                 {
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
@@ -198,7 +198,7 @@ namespace Playground
                         && cancelTask.Result?.Key == ConsoleKey.Escape)
                     {
                         cts.Cancel();
-                        Warn("Input cancelled.");
+                        Warn("Input finished.");
                         return starDescs;
                     }
                 }
@@ -210,7 +210,7 @@ namespace Playground
                     firstDoc.MouseAnnulusWidth);
                 Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
 
-                Info($"Awaiting user input: second ray of star {i}.");
+                Info($"Awaiting user input: second ray of star ##{i}.");
                 while (true)
                 {
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
@@ -225,7 +225,7 @@ namespace Playground
                         && cancelTask.Result?.Key == ConsoleKey.Escape)
                     {
                         cts.Cancel();
-                        Warn("Input cancelled.");
+                        Warn("Input finished.");
                         return starDescs;
                     }
                 }
@@ -242,6 +242,7 @@ namespace Playground
                     Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
 
                 starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
+                i++;
             }
         }
 
