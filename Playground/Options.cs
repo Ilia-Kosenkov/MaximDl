@@ -20,6 +20,9 @@ namespace Playground
         [Option("comment-char", Default = "#", HelpText = "CSV header comment sign")]
         public string CommentChar { get; set; }
 
+        [Option("suffix", Default = "", HelpText = "Suffix of the output csv files")]
+        public string Suffix { get; set; }
+
         public IEnumerable<IFileSystemInfo> EnumerateFiles() =>
             from pathGlob in Files
             from item in Ganss.IO.Glob.Expand(pathGlob)

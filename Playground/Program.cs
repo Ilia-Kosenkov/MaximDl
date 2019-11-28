@@ -225,7 +225,7 @@ namespace Playground
             var root = opts.OutFolderPath();
 
             return starDescs
-                .Select((x, locId) => $"star_{locId}_{x.Aperture}.csv")
+                .Select((x, locId) => $"star_{locId}_{x.Aperture}{opts.Suffix}.csv")
                 .Select(x => Path.Combine(root, x));
         }
 
