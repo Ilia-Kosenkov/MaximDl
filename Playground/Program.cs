@@ -5,9 +5,8 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
-using MaximDl;
+using MaxImDL;
 
 namespace Playground
 {
@@ -95,18 +94,109 @@ namespace Playground
                 .OrderBy(x => x.Mjd)
                 .ToList();
 
+            Info("Press [ESCAPE] to finish selection.");
+
+            var descs = await WaitForSelectionAsync(firstDoc);
+            //while(true)
+            //{
+
+            //    Info($"Awaiting user input: first ray of star {i}.");
+            //    while (true)
+            //    {
+            //        var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token:cts.Token), task);
+            //        if (awaitedTask is Task<bool> clickTask && firstDoc.MouseDown)
+            //            break;
+            //    }
+
+            //    var firstRay = firstDoc.MousePosition;
+            //    var firstRing = new Ring(
+            //        firstDoc.MouseRadius,
+            //        firstDoc.MouseGapWidth,
+            //        firstDoc.MouseAnnulusWidth);
+            //    Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
+
+            //    Info($"Awaiting user input: second ray of star {i}.");
+            //    while (true)
+            //    {
+            //        await firstDoc.AwaitMouseNewClickEventAsync();
+            //        if (firstDoc.MouseDown)
+            //            break;
+            //    }
+
+
+            //    var secondRay = firstDoc.MousePosition;
+            //    var secondRing = new Ring(
+            //        firstDoc.MouseRadius,
+            //        firstDoc.MouseGapWidth,
+            //        firstDoc.MouseAnnulusWidth);
+            //    Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
+
+
+            //    if (secondRing != firstRing)
+            //        Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
+
+            //    starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
+            //}
+
+            //var results = MeasureAll(docs, starDescs);
+
+            //var jobs = GenerateOutPaths(starDescs)
+            //    .Zip(results)
+            //    .Select(async x =>
+            //    {
+            //        var (first, (_, value)) = x;
+            //        using var str = new SimpleCsvWriter(first);
+            //        await str.Dump(value, dates);
+            //    })
+            //    .ToArray();
+
+            //var id = 0;
+            //foreach (var item in results)
+            //{
+            //    ShowResults(++id, item.Value, dates);
+            //}
+
+            //await Task.WhenAll(jobs);
+        }
+
+        private static async Task<List<CoordDesc>> WaitForSelectionAsync(MaxImDlDoc firstDoc)
+        {
+            var i = 1;
             var starDescs = new List<CoordDesc>();
 
-            // TODO: await user input
-            const int n = 2;
-            for (var i = 1; i <= n; i++)
+            var cts = new CancellationTokenSource();
+            var task = Task.Run(async () =>
             {
+                var key = await ReadKeyAsync(cts.Token);
+                while (key?.Key != ConsoleKey.Escape && !cts.IsCancellationRequested)
+                {
+                    key = await ReadKeyAsync(cts.Token);
+                }
+
+                return key;
+            }, cts.Token);
+
+            while (true)
+            {
+
                 Info($"Awaiting user input: first ray of star {i}.");
                 while (true)
                 {
-                    await firstDoc.AwaitMouseNewClickEventAsync();
-                    if (firstDoc.MouseDown)
+                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
+                    
+                    if (awaitedTask is Task<bool> clickTask
+                        && clickTask.IsCompletedSuccessfully
+                        && firstDoc.MouseDown)
                         break;
+
+                    if (awaitedTask is Task<ConsoleKeyInfo?> cancelTask
+                        && cancelTask.IsCompletedSuccessfully
+                        && cancelTask.Result?.Key == ConsoleKey.Escape)
+                    {
+                        cts.Cancel();
+                        Warn("Input cancelled.");
+                        return starDescs;
+                    }
                 }
 
                 var firstRay = firstDoc.MousePosition;
@@ -119,11 +209,22 @@ namespace Playground
                 Info($"Awaiting user input: second ray of star {i}.");
                 while (true)
                 {
-                    await firstDoc.AwaitMouseNewClickEventAsync();
-                    if (firstDoc.MouseDown)
-                        break;
-                }
+                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
 
+                    if (awaitedTask is Task<bool> clickTask
+                        && clickTask.IsCompletedSuccessfully
+                        && firstDoc.MouseDown)
+                        break;
+
+                    if (awaitedTask is Task<ConsoleKeyInfo?> cancelTask
+                        && cancelTask.IsCompletedSuccessfully
+                        && cancelTask.Result?.Key == ConsoleKey.Escape)
+                    {
+                        cts.Cancel();
+                        Warn("Input cancelled.");
+                        return starDescs;
+                    }
+                }
 
                 var secondRay = firstDoc.MousePosition;
                 var secondRing = new Ring(
@@ -138,26 +239,6 @@ namespace Playground
 
                 starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
             }
-
-            var results = MeasureAll(docs, starDescs);
-
-            var jobs = GenerateOutPaths(starDescs)
-                .Zip(results)
-                .Select(async x =>
-                {
-                    var (first, (_, value)) = x;
-                    using var str = new SimpleCsvWriter(first);
-                    await str.Dump(value, dates);
-                })
-                .ToArray();
-
-            var id = 0;
-            foreach (var item in results)
-            {
-                ShowResults(++id, item.Value, dates);
-            }
-
-            await Task.WhenAll(jobs);
         }
 
         private static IEnumerable<string> GenerateOutPaths(IReadOnlyList<CoordDesc> starDescs)

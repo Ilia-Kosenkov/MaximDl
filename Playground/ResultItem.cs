@@ -1,4 +1,6 @@
-﻿namespace Playground
+﻿using MaxImDL;
+
+namespace Playground
 {
     internal struct ResultItem
     {

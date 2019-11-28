@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MaximDl
+namespace MaxImDL
 {
     public sealed class MaxImDlDoc : ComType
     {
@@ -59,12 +59,16 @@ namespace MaximDl
         public void SaveFile(string path, ImageType format = ImageType.Fits, bool stretch = false, PixelDataFormat sizeFormat = PixelDataFormat.I16Bit, short compression = 0)
             => InvokeMethod(nameof(SaveFile), path, (byte)format, stretch, (byte)sizeFormat, compression);
 
+        public Task<bool> AwaitMouseNewClickEventAsync(
+            CancellationToken token = default,
+            TimeSpan delay = default,
+            TimeSpan timeout = default)
+        {
+            delay = delay == default ? TimeSpan.FromMilliseconds(200) : delay;
+            timeout = timeout == default ? TimeSpan.MaxValue : timeout;
 
-        public Task<bool> AwaitMouseNewClickEventAsync(TimeSpan timeout)
-            => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0, timeout));
-
-        public Task AwaitMouseNewClickEventAsync()
-            => Task.Run(() => SpinWait.SpinUntil(() => MouseNewClick != 0));
+            return AsyncHelper.SpinOnPropertyAsync(() => MouseNewClick != 0, token, delay, timeout);
+        }
     }
 
 }

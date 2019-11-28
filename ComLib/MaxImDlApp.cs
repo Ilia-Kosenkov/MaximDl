@@ -1,6 +1,6 @@
 using System;
 
-namespace MaximDl
+namespace MaxImDL
 {
     public sealed class MaxImDlApp : ComType
     {

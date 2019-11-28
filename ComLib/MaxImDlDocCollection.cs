@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace MaximDl
+namespace MaxImDL
 {
     public sealed class MaxImDlDocCollection : ComType, IReadOnlyCollection<MaxImDlDoc>
     {
