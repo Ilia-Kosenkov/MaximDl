@@ -186,7 +186,8 @@ namespace Playground
                 Info($"Awaiting user input: first ray of star ##{i}.");
                 while (true)
                 {
-                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
+                    Console.WriteLine("In while loop");
+                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
                     
                     if (awaitedTask is Task<bool> clickTask
                         && clickTask.IsCompletedSuccessfully
@@ -213,7 +214,8 @@ namespace Playground
                 Info($"Awaiting user input: second ray of star ##{i}.");
                 while (true)
                 {
-                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token: cts.Token), task);
+                    Console.WriteLine("In while loop");
+                    var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
 
                     if (awaitedTask is Task<bool> clickTask
                         && clickTask.IsCompletedSuccessfully
