@@ -258,11 +258,11 @@ namespace Playground
             IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData)
         {
             static string GenerateString(ObjectInfo info) 
-                => $"{info.X, 6:F2} | {info.Y, 6:F2} | {info.FullIntensity, 12:E5} | {info.SNR, 6:F2}";
+                => $"{info.X, 6:F2} | {info.Y, 6:F2} | {info.FullIntensity, 12:E5} | {info.SNR, 7:F2}";
 
 
 
-            var header = $"{("X"), 6} | {("Y"), 6} | {("Int"), 12} | {("SNR"), 6}";
+            var header = $"{("X"), 6} | {("Y"), 6} | {("Int"), 12} | {("SNR"), 7}";
             var @break = new string('-', 2 * header.Length + 24);
             lock (Locker)
             {

@@ -49,7 +49,8 @@ namespace Playground
                 "Flux_2",
                 "SNR_2",
                 "StDev_2",
-                "Obj1" // For compatibility with older {Dipol2Red} package
+                //"Obj1" // For compatibility with older {Dipol2Red} package
+                "dMag"
             };
 
             try
