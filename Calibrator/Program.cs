@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using CommandLine;
-using MaximDl;
+using MaxImDL;
 
 namespace Calibrator
 {
