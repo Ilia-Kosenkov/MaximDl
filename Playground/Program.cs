@@ -116,9 +116,7 @@ namespace Playground
 
             var id = 0;
             foreach (var item in results)
-            {
                 ShowResults(++id, item.Value, dates);
-            }
 
             await Task.WhenAll(jobs);
         }
