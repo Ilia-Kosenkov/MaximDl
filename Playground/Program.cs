@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Abstractions;
 using System.Threading.Tasks;
 using System.Linq;
 using MaximDl;
@@ -14,107 +15,110 @@ namespace Playground
         private static async Task Main()
         {
             const string pathGlob = @"C:\NOT_July2019\Correct\Data\Polarization\Night_1\binned_X_3\V\*.fits";
-            const int n = 2;
             System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            
             using var app = MaxImDlApp.Acquire();
             var files = Ganss.IO.Glob.Expand(pathGlob);
-            
-            foreach(var item in files)//.Take(8))
+
+            await Process(app, files);
+
+            app.CloseAll();
+        }
+
+        private static async Task Process(MaxImDlApp app, IEnumerable<IFileSystemInfo> files)
+        {
+            foreach (var item in files)
             {
                 using var doc = app.CreateDocument();
                 doc.OpenFile(item.FullName);
             }
 
-            using (var docs = app.Documents)
+            using var docs = app.Documents;
+            using var firstDoc = docs[0];
+            firstDoc.BringToTop();
+
+            // DATE-OBS
+            var dates = docs.Select(d =>
+                {
+                    using (d)
+                    {
+                        return DateTimeOffset.TryParse(
+                            d.GetFITSKey(@"DATE-OBS") as string,
+                            DateTimeFormatInfo.InvariantInfo,
+                            DateTimeStyles.AssumeUniversal,
+                            out var dt)
+                            ? dt
+                            : default;
+                    }
+                })
+                .Select((x, j) => (Date: x, Mjd: DateToMjd(x), Id: j))
+                .OrderBy(x => x.Mjd)
+                .ToList();
+
+            var starDescs = new List<CoordDesc>();
+
+            // TODO: await user input
+            const int n = 2;
+            for (var i = 1; i <= n; i++)
             {
-                using var firstDoc = docs[0];
-                firstDoc.BringToTop();
-
-                // DATE-OBS
-                var dates = docs.Select(d =>
-                    {
-                        using (d)
-                        {
-                            return DateTimeOffset.TryParse(
-                                d.GetFITSKey(@"DATE-OBS") as string,
-                                DateTimeFormatInfo.InvariantInfo,
-                                DateTimeStyles.AssumeUniversal,
-                                out var dt)
-                                ? dt
-                                : default;
-                        }
-                    })
-                    .Select((x, j) => (Date: x, Mjd: DateToMjd(x), Id: j))
-                    .OrderBy(x => x.Mjd)
-                    .ToList();
-
-                var starDescs = new List<CoordDesc>(n);
-
-
-                for(var i = 1; i <= n; i++)
+                Info($"Awaiting user input: first ray of star {i}.");
+                while (true)
                 {
-                    Info($"Awaiting user input: first ray of star {i}/{n}.");
-                    while(true)
-                    {
-                        await firstDoc.AwaitMouseNewClickEventAsync();
-                        if(firstDoc.MouseDown)
-                            break;
-                    }
-
-                    var firstRay = firstDoc.MousePosition;
-                    var firstRing = new Ring(
-                        firstDoc.MouseRadius,
-                        firstDoc.MouseGapWidth,
-                        firstDoc.MouseAnnulusWidth);
-                    Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
-
-                    Info($"Awaiting user input: second ray of star {i}/{n}.");
-                    while (true)
-                    {
-                        await firstDoc.AwaitMouseNewClickEventAsync();
-                        if(firstDoc.MouseDown)
-                            break;
-                    }
-                    
-
-                    var secondRay = firstDoc.MousePosition;
-                    var secondRing = new Ring(
-                        firstDoc.MouseRadius,
-                        firstDoc.MouseGapWidth,
-                        firstDoc.MouseAnnulusWidth);
-                    Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
-
-
-                    if (secondRing != firstRing)
-                        Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
-
-                    starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
+                    await firstDoc.AwaitMouseNewClickEventAsync();
+                    if (firstDoc.MouseDown)
+                        break;
                 }
 
-                var results = MeasureAll(docs, starDescs);
+                var firstRay = firstDoc.MousePosition;
+                var firstRing = new Ring(
+                    firstDoc.MouseRadius,
+                    firstDoc.MouseGapWidth,
+                    firstDoc.MouseAnnulusWidth);
+                Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
 
-                var jobs = GenerateOutPaths(starDescs)
-                    .Zip(results)
-                    .Select(async x =>
-                    {
-                        var (first, (_, value)) = x;
-                        using var str = new SimpleCsvWriter(first);
-                        await str.Dump(value, dates);
-                    })
-                    .ToArray();
-
-                var id = 0;
-                foreach (var item in results)
+                Info($"Awaiting user input: second ray of star {i}.");
+                while (true)
                 {
-                    ShowResults(++id, item.Value, dates);
+                    await firstDoc.AwaitMouseNewClickEventAsync();
+                    if (firstDoc.MouseDown)
+                        break;
                 }
 
-                await Task.WhenAll(jobs);
+
+                var secondRay = firstDoc.MousePosition;
+                var secondRing = new Ring(
+                    firstDoc.MouseRadius,
+                    firstDoc.MouseGapWidth,
+                    firstDoc.MouseAnnulusWidth);
+                Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
+
+
+                if (secondRing != firstRing)
+                    Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
+
+                starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
             }
 
+            var results = MeasureAll(docs, starDescs);
 
-            app.CloseAll();
+            var jobs = GenerateOutPaths(starDescs)
+                .Zip(results)
+                .Select(async x =>
+                {
+                    var (first, (_, value)) = x;
+                    using var str = new SimpleCsvWriter(first);
+                    await str.Dump(value, dates);
+                })
+                .ToArray();
+
+            var id = 0;
+            foreach (var item in results)
+            {
+                ShowResults(++id, item.Value, dates);
+            }
+
+            await Task.WhenAll(jobs);
         }
 
         private static IEnumerable<string> GenerateOutPaths(IReadOnlyList<CoordDesc> starDescs)
