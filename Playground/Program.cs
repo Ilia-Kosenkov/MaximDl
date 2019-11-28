@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Abstractions;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Threading;
+using CommandLine;
 using MaxImDL;
 
 namespace Playground
@@ -13,16 +13,32 @@ namespace Playground
     internal class Program
     {
         private static readonly object Locker = new object();
-        private static async Task Main()
+        private static async Task<int> Main(string[] args)
         {
-            const string pathGlob = @"C:\NOT_July2019\Correct\Data\Polarization\Night_1\binned_X_3\V\*.fits";
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
-            using var app = MaxImDlApp.Acquire();
-            var files = Ganss.IO.Glob.Expand(pathGlob);
+            using var parser = new Parser();
+            var result = parser.ParseArguments<Options>(args);
 
-            await Process(app, files);
+            return await result.MapResult(
+                async opts =>
+                {
+                    await StartApp(opts);
+                    return 0;
+                },
+                async err =>
+                {
+                    await Console.Error.WriteLineAsync(CommandLine.Text.HelpText.AutoBuild(result));
+                    return -1;
+                });
+        }
+
+        private static async Task StartApp(Options opts)
+        {
+            using var app = MaxImDlApp.Acquire();
+
+            await Process(app, opts);
 
             app.CloseAll();
         }
@@ -64,9 +80,9 @@ namespace Playground
             }
         }
 
-        private static async Task Process(MaxImDlApp app, IEnumerable<IFileSystemInfo> files)
+        private static async Task Process(MaxImDlApp app, Options opts)
         {
-            foreach (var item in files)
+            foreach (var item in opts.EnumerateFiles())
             {
                 using var doc = app.CreateDocument();
                 doc.OpenFile(item.FullName);
@@ -104,13 +120,13 @@ namespace Playground
 
             var results = MeasureAll(docs, starDescs);
 
-            var jobs = GenerateOutPaths(starDescs)
+            var jobs = GenerateOutPaths(starDescs, opts)
                 .Zip(results)
                 .Select(async x =>
                 {
                     var (first, (_, value)) = x;
                     using var str = new SimpleCsvWriter(first);
-                    await str.Dump(value, dates);
+                    await str.Dump(value, dates, opts);
                 })
                 .ToArray();
 
@@ -204,11 +220,13 @@ namespace Playground
             }
         }
 
-        private static IEnumerable<string> GenerateOutPaths(IReadOnlyList<CoordDesc> starDescs)
+        private static IEnumerable<string> GenerateOutPaths(IReadOnlyList<CoordDesc> starDescs, Options opts)
         {
-            if (!Directory.Exists(@"test"))
-                Directory.CreateDirectory(@"test");
-            return starDescs.Select((x, locId) => $@"test\{locId}_{x.Aperture.Aperture}.csv").Select(Path.GetFullPath);
+            var root = opts.OutFolderPath();
+
+            return starDescs
+                .Select((x, locId) => $"star_{locId}_{x.Aperture}.csv")
+                .Select(x => Path.Combine(root, x));
         }
 
         private static Dictionary<CoordDesc, ResultItem> Measure(MaxImDlDoc doc, IEnumerable<CoordDesc> descs) =>

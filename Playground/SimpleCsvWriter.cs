@@ -29,9 +29,16 @@ namespace Playground
 
         public async Task Dump(
             IReadOnlyList<ResultItem> data,
-            IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData)
+            IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData,
+            Options opts)
         {
             Program.Info($"Saving {(_path ?? "file")}");
+            if (opts.PrintHeader)
+            {
+                await _internalWriter.WriteLineAsync($"{opts.CommentChar} First ray approx. coords: {data[0].FirstResult.X}, {data[0].FirstResult.Y}");
+                await _internalWriter.WriteLineAsync($"{opts.CommentChar} Second ray approx. coords: {data[0].SecondResult.X}, {data[0].SecondResult.Y}");
+            }
+
             var header = new[]
             {
                 "Id",
@@ -47,7 +54,7 @@ namespace Playground
 
             try
             {
-                await _internalWriter.WriteLineAsync(header.Aggregate((old, @new) => old + "," + @new));
+                await _internalWriter.WriteAsync(header.Aggregate((old, @new) => old + "," + @new));
 
             }
             catch (Exception e)

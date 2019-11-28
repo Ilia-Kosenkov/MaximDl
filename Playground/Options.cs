@@ -17,6 +17,9 @@ namespace Playground
         [Option('h', "header", Default = false, HelpText = "Print commented out header in the csv file")]
         public bool PrintHeader { get; set; }
 
+        [Option("comment-char", Default = "#", HelpText = "CSV header comment sign")]
+        public string CommentChar { get; set; }
+
         public IEnumerable<IFileSystemInfo> EnumerateFiles() =>
             from pathGlob in Files
             from item in Ganss.IO.Glob.Expand(pathGlob)
