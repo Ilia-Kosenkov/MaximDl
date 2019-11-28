@@ -186,7 +186,6 @@ namespace Playground
                 Info($"Awaiting user input: first ray of star ##{i}.");
                 while (true)
                 {
-                    Console.WriteLine("In while loop");
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
                     
                     if (awaitedTask is Task<bool> clickTask
@@ -202,6 +201,8 @@ namespace Playground
                         Warn("Input finished.");
                         return starDescs;
                     }
+
+                    Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
                 }
 
                 var firstRay = firstDoc.MousePosition;
@@ -214,7 +215,6 @@ namespace Playground
                 Info($"Awaiting user input: second ray of star ##{i}.");
                 while (true)
                 {
-                    Console.WriteLine("In while loop");
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
 
                     if (awaitedTask is Task<bool> clickTask
@@ -230,6 +230,8 @@ namespace Playground
                         Warn("Input finished.");
                         return starDescs;
                     }
+                    Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
+
                 }
 
                 var secondRay = firstDoc.MousePosition;
