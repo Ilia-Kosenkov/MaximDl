@@ -201,8 +201,9 @@ namespace Playground
                         Warn("Input finished.");
                         return starDescs;
                     }
-
                     Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
+                    if(awaitedTask is Task<bool> temp)
+                        Console.WriteLine($"{temp.IsCompletedSuccessfully} {temp.IsCompleted} {temp.Result}");
                 }
 
                 var firstRay = firstDoc.MousePosition;
@@ -231,7 +232,8 @@ namespace Playground
                         return starDescs;
                     }
                     Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
-
+                    if (awaitedTask is Task<bool> temp)
+                        Console.WriteLine($"{temp.IsCompletedSuccessfully} {temp.IsCompleted} {temp.Result}");
                 }
 
                 var secondRay = firstDoc.MousePosition;
