@@ -97,6 +97,10 @@ namespace Playground
             Info("Press [ESCAPE] to finish selection.");
 
             var descs = await WaitForSelectionAsync(firstDoc);
+
+            Console.WriteLine($"Received {descs.Count} stars");
+            foreach(var items in descs)
+                Console.WriteLine($"{items.FirstPosition}; {items.SecondPosition}");
             //while(true)
             //{
 
