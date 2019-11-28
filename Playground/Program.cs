@@ -40,7 +40,7 @@ namespace Playground
                 token,
                 delay,
                 timeOut)
-                ? Console.ReadKey()
+                ? Console.ReadKey(true)
                 : (ConsoleKeyInfo?) null;
         }
 
