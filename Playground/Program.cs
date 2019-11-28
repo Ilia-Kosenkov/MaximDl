@@ -124,9 +124,9 @@ namespace Playground
                 .Zip(results)
                 .Select(async x =>
                 {
-                    var (first, (_, value)) = x;
+                    var (first, (cDesc, value)) = x;
                     using var str = new SimpleCsvWriter(first);
-                    await str.Dump(value, dates, opts);
+                    await str.Dump(value, dates, opts, cDesc);
                 })
                 .ToArray();
 

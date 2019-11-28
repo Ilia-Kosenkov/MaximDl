@@ -30,13 +30,15 @@ namespace Playground
         public async Task Dump(
             IReadOnlyList<ResultItem> data,
             IReadOnlyList<(DateTimeOffset Date, double Mjd, int Id)> metaData,
-            Options opts)
+            Options opts,
+            CoordDesc desc)
         {
             Program.Info($"Saving {(_path ?? "file")}");
             if (opts.PrintHeader)
             {
-                await _internalWriter.WriteLineAsync($"{opts.CommentChar} First ray approx. coords: {data[0].FirstResult.X}, {data[0].FirstResult.Y}");
-                await _internalWriter.WriteLineAsync($"{opts.CommentChar} Second ray approx. coords: {data[0].SecondResult.X}, {data[0].SecondResult.Y}");
+                await _internalWriter.WriteLineAsync($"{opts.CommentChar} First ray approx. coords: {desc.FirstPosition}");
+                await _internalWriter.WriteLineAsync($"{opts.CommentChar} Second ray approx. coords: {desc.SecondPosition}");
+                await _internalWriter.WriteLineAsync($"{opts.CommentChar} Aperture settings: {desc.Aperture}");
             }
 
             var header = new[]
