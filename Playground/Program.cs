@@ -96,71 +96,31 @@ namespace Playground
 
             Info("Press [ESCAPE] to finish selection.");
 
-            var descs = await WaitForSelectionAsync(firstDoc);
+            var starDescs = await WaitForSelectionAsync(firstDoc);
 
-            Console.WriteLine($"Received {descs.Count} stars");
-            foreach(var items in descs)
-                Console.WriteLine($"{items.FirstPosition}; {items.SecondPosition}");
-            //while(true)
-            //{
+            Info($"Received {starDescs.Count} stars");
+            foreach(var items in starDescs)
+                Info($"{items.FirstPosition}; {items.SecondPosition} with {items.Aperture}");
 
-            //    Info($"Awaiting user input: first ray of star {i}.");
-            //    while (true)
-            //    {
-            //        var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(token:cts.Token), task);
-            //        if (awaitedTask is Task<bool> clickTask && firstDoc.MouseDown)
-            //            break;
-            //    }
+            var results = MeasureAll(docs, starDescs);
 
-            //    var firstRay = firstDoc.MousePosition;
-            //    var firstRing = new Ring(
-            //        firstDoc.MouseRadius,
-            //        firstDoc.MouseGapWidth,
-            //        firstDoc.MouseAnnulusWidth);
-            //    Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
+            var jobs = GenerateOutPaths(starDescs)
+                .Zip(results)
+                .Select(async x =>
+                {
+                    var (first, (_, value)) = x;
+                    using var str = new SimpleCsvWriter(first);
+                    await str.Dump(value, dates);
+                })
+                .ToArray();
 
-            //    Info($"Awaiting user input: second ray of star {i}.");
-            //    while (true)
-            //    {
-            //        await firstDoc.AwaitMouseNewClickEventAsync();
-            //        if (firstDoc.MouseDown)
-            //            break;
-            //    }
+            var id = 0;
+            foreach (var item in results)
+            {
+                ShowResults(++id, item.Value, dates);
+            }
 
-
-            //    var secondRay = firstDoc.MousePosition;
-            //    var secondRing = new Ring(
-            //        firstDoc.MouseRadius,
-            //        firstDoc.MouseGapWidth,
-            //        firstDoc.MouseAnnulusWidth);
-            //    Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
-
-
-            //    if (secondRing != firstRing)
-            //        Warn($"Star {i}: aperture settings for different rays are not equal. Using aperture of first ray.");
-
-            //    starDescs.Add(new CoordDesc(firstRay, secondRay, firstRing));
-            //}
-
-            //var results = MeasureAll(docs, starDescs);
-
-            //var jobs = GenerateOutPaths(starDescs)
-            //    .Zip(results)
-            //    .Select(async x =>
-            //    {
-            //        var (first, (_, value)) = x;
-            //        using var str = new SimpleCsvWriter(first);
-            //        await str.Dump(value, dates);
-            //    })
-            //    .ToArray();
-
-            //var id = 0;
-            //foreach (var item in results)
-            //{
-            //    ShowResults(++id, item.Value, dates);
-            //}
-
-            //await Task.WhenAll(jobs);
+            await Task.WhenAll(jobs);
         }
 
         private static async Task<List<CoordDesc>> WaitForSelectionAsync(MaxImDlDoc firstDoc)
@@ -183,14 +143,14 @@ namespace Playground
             while (true)
             {
 
-                Info($"Awaiting user input: first ray of star ##{i}.");
+                Info($"Awaiting user input: first ray of star # {i}.");
                 while (true)
                 {
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
                     
                     if (awaitedTask is Task<bool> clickTask
                         && clickTask.IsCompletedSuccessfully
-                        && firstDoc.MouseDown)
+                        && firstDoc.MouseUp)
                         break;
 
                     if (awaitedTask is Task<ConsoleKeyInfo?> cancelTask
@@ -201,9 +161,6 @@ namespace Playground
                         Warn("Input finished.");
                         return starDescs;
                     }
-                    Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
-                    if(awaitedTask is Task<bool> temp)
-                        Console.WriteLine($"{temp.IsCompletedSuccessfully} {temp.IsCompleted} {temp.Result}");
                 }
 
                 var firstRay = firstDoc.MousePosition;
@@ -211,16 +168,16 @@ namespace Playground
                     firstDoc.MouseRadius,
                     firstDoc.MouseGapWidth,
                     firstDoc.MouseAnnulusWidth);
-                Info($"Aperture {firstRing.Aperture}x{firstRing.Gap}x{firstRing.Annulus} at ({firstRay.X},{firstRay.Y})");
+                Info($"Aperture {firstRing} at ({firstRay.X},{firstRay.Y})");
 
-                Info($"Awaiting user input: second ray of star ##{i}.");
+                Info($"Awaiting user input: second ray of star # {i}.");
                 while (true)
                 {
                     var awaitedTask = await Task.WhenAny(firstDoc.AwaitMouseNewClickEventAsync(cts.Token), task);
 
                     if (awaitedTask is Task<bool> clickTask
                         && clickTask.IsCompletedSuccessfully
-                        && firstDoc.MouseDown)
+                        && firstDoc.MouseUp)
                         break;
 
                     if (awaitedTask is Task<ConsoleKeyInfo?> cancelTask
@@ -231,9 +188,6 @@ namespace Playground
                         Warn("Input finished.");
                         return starDescs;
                     }
-                    Console.WriteLine($"{awaitedTask.GetType()} \t {firstDoc.MouseDown}");
-                    if (awaitedTask is Task<bool> temp)
-                        Console.WriteLine($"{temp.IsCompletedSuccessfully} {temp.IsCompleted} {temp.Result}");
                 }
 
                 var secondRay = firstDoc.MousePosition;
@@ -241,7 +195,7 @@ namespace Playground
                     firstDoc.MouseRadius,
                     firstDoc.MouseGapWidth,
                     firstDoc.MouseAnnulusWidth);
-                Info($"Aperture {secondRing.Aperture}x{secondRing.Gap}x{secondRing.Annulus} at ({secondRay.X},{secondRay.Y})");
+                Info($"Aperture {secondRing} at ({secondRay.X},{secondRay.Y})");
 
 
                 if (secondRing != firstRing)

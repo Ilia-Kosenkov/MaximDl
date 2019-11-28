@@ -52,6 +52,8 @@ namespace MaxImDL
             }
         }
 
+        public override string ToString() => $"{Aperture}x{Gap}x{Annulus}";
+
         public static bool operator ==(Ring left, Ring right)
             => left.Equals(right);
 
