@@ -5,6 +5,8 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using MaximDl;
 
 namespace Playground
@@ -15,15 +17,52 @@ namespace Playground
         private static async Task Main()
         {
             const string pathGlob = @"C:\NOT_July2019\Correct\Data\Polarization\Night_1\binned_X_3\V\*.fits";
-            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-            
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             using var app = MaxImDlApp.Acquire();
             var files = Ganss.IO.Glob.Expand(pathGlob);
 
             await Process(app, files);
 
             app.CloseAll();
+        }
+
+        private static async Task<ConsoleKeyInfo?> ReadKeyAsync(
+            CancellationToken token = default,
+            TimeSpan delay = default,
+            TimeSpan timeOut = default)
+        {
+            delay = delay == default ? TimeSpan.FromMilliseconds(100) : delay;
+            timeOut = timeOut == default ? TimeSpan.MaxValue : timeOut;
+
+            return await SpinOnPropertyAsync(
+                () => Console.KeyAvailable,
+                token,
+                delay,
+                timeOut)
+                ? Console.ReadKey()
+                : (ConsoleKeyInfo?) null;
+        }
+
+        private static async Task<bool> SpinOnPropertyAsync(Func<bool> condition, CancellationToken token, TimeSpan delay, TimeSpan timeout)
+        {
+            var start = DateTime.UtcNow;
+
+            if (condition())
+                return true;
+
+            while (true)
+            {
+                if (await Task.Run(() => SpinWait.SpinUntil(condition, delay)))
+                    return true;
+
+                var now = DateTime.UtcNow;
+                if ((now - start).Ticks > timeout.Ticks || token.IsCancellationRequested)
+                    return false;
+
+                await Task.Delay(delay);
+            }
         }
 
         private static async Task Process(MaxImDlApp app, IEnumerable<IFileSystemInfo> files)
