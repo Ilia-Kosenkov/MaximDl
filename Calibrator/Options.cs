@@ -15,7 +15,7 @@ namespace Calibrator
         [Option('b', "bias", Separator=';', HelpText = "Explicitly specified bias files")]
         public IEnumerable<string> Bias { get; set; }
 
-        [Option("bin", Default = (ushort)0, HelpText = "Bining, 0 | 2 | 3")]
+        [Option("bin", Default = (byte)0, HelpText = "Bining, 0 | 2 | 3")]
         public byte Bin { get; set; }
 
         [Option('o', "out-folder", Default = "calibrated", HelpText = "Folder to put calibrated frames into")]
